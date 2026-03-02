@@ -14,7 +14,8 @@ RUN pip install --no-cache-dir \
     fastapi==0.109.0 \
     uvicorn==0.27.0 \
     python-multipart==0.0.6 \
-    httpx==0.26.0
+    httpx==0.26.0 \
+    requests==2.31.0
 
 # Copy application
 COPY app.py .
