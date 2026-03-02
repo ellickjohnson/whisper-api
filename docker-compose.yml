@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  whisper-api:
+    image: ghcr.io/ellickjohnson/whisper-api:latest
+    build: .
+    container_name: whisper-api
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      - WHISPER_MODEL=medium
+      - WHISPER_DEVICE=cuda
+      - WHISPER_COMPUTE_TYPE=float16
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - whisper-cache:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - whisper-net
+      - proxy-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8001/health').raise_for_status()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  whisper-net:
+    driver: bridge
+  proxy-net:
+    external: true
+
+volumes:
+  whisper-cache:
